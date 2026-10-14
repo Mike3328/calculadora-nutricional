@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16231F">
+  <meta name="description" content="Calculadora nutricional de apoyo académico: GEB, GET, macronutrimentos, cuadro de equivalentes SMAE y reparto por tiempos de comida.">
+  <title>Calculadora nutricional</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <a class="salto visually-hidden-focusable" href="#contenido">Saltar al contenido</a>
+
+  <header class="app-header">
+    <div class="app-container app-header__fila">
+      <div class="marca">
+        <img class="marca__logo" src="assets/icons/favicon.svg" alt="" width="36" height="36">
+        <div>
+          <h1 class="marca__titulo">Calculadora nutricional</h1>
+          <p class="marca__sub">Equivalentes SMAE · apoyo académico</p>
+        </div>
+      </div>
+      <div class="app-header__acciones">
+        <button type="button" class="btn btn-outline-primary btn-accion" id="btn-imprimir" aria-label="Imprimir o guardar como PDF">
+          <i class="bi bi-printer" aria-hidden="true"></i><span class="btn-accion__txt">Imprimir / PDF</span>
+        </button>
+        <button type="button" class="btn btn-primary btn-accion" id="btn-nuevo" aria-label="Nuevo paciente">
+          <i class="bi bi-person-plus" aria-hidden="true"></i><span class="btn-accion__txt">Nuevo paciente</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación superior: pestañas en tablet, anclas con scroll en desktop -->
+  <nav class="pasos-nav" aria-label="Pasos de la calculadora">
+    <div class="app-container">
+      <ul class="pasos-nav__lista">
+        <li><button type="button" class="pasos-nav__btn" data-ir="1"><span class="pasos-nav__num num" aria-hidden="true">01</span>Paciente</button></li>
+        <li><button type="button" class="pasos-nav__btn" data-ir="2"><span class="pasos-nav__num num" aria-hidden="true">02</span>Energía</button></li>
+        <li><button type="button" class="pasos-nav__btn" data-ir="3"><span class="pasos-nav__num num" aria-hidden="true">03</span>Macros</button></li>
+        <li><button type="button" class="pasos-nav__btn" data-ir="4"><span class="pasos-nav__num num" aria-hidden="true">04</span>Equivalentes</button></li>
+        <li><button type="button" class="pasos-nav__btn" data-ir="5"><span class="pasos-nav__num num" aria-hidden="true">05</span>Tiempos</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="app-container app-cuerpo">
+
+    <!-- Resumen persistente: columna (desktop), tira superior (tablet), barra inferior (móvil) -->
+    <aside class="resumen" id="resumen" aria-label="Resumen">
+      <div class="resumen__paciente">
+        <span class="resumen__eyebrow">Resumen</span>
+        <strong class="resumen__nombre" id="r-nombre">—</strong>
+        <span class="resumen__datos" id="r-datos"></span>
+      </div>
+      <div class="resumen__get">
+        <span class="resumen__lbl">GET</span>
+        <span class="resumen__get-val"><span class="num" id="r-get">—</span><span class="resumen__uni">kcal/día</span></span>
+      </div>
+      <dl class="resumen__stats">
+        <div>
+          <dt>GEB · <span id="r-formula"></span></dt>
+          <dd><span class="num" id="r-geb">—</span> <span class="resumen__uni">kcal</span></dd>
+        </div>
+        <div>
+          <dt>IMC</dt>
+          <dd><span class="num" id="r-imc">—</span> <span class="resumen__uni">kg/m²</span></dd>
+        </div>
+        <div>
+          <dt>Meta · <span id="r-meta-origen"></span></dt>
+          <dd><span class="num" id="r-meta">—</span> <span class="resumen__uni">kcal</span></dd>
+        </div>
+      </dl>
+      <div class="resumen__adec">
+        <span class="resumen__lbl resumen__adec-titulo">% de adecuación</span>
+        <div class="resumen__adec-lista" id="r-adec"></div>
+      </div>
+    </aside>
+
+    <main class="pasos" id="contenido" tabindex="-1">
+
+      <!-- ===== Paso 1 ===== -->
+      <section class="paso" id="paso-1" data-paso="1" aria-labelledby="t-paso-1">
+        <header class="paso__cab">
+          <span class="paso__num num" aria-hidden="true">01</span>
+          <div>
+            <h2 class="paso__titulo" id="t-paso-1">Datos del paciente</h2>
+            <p class="paso__sub">Todo se recalcula al instante. Nada se guarda en el dispositivo.</p>
+          </div>
+        </header>
+
+        <div class="campos-paciente">
+          <div class="campo campo--nombre">
+            <label class="form-label" for="f-nombre">Nombre</label>
+            <input type="text" class="form-control" id="f-nombre" data-campo="paciente.nombre" autocomplete="off" maxlength="80" placeholder="Nombre del paciente">
+          </div>
+          <fieldset class="campo campo--sexo">
+            <legend class="form-label">Sexo</legend>
+            <div class="segmentado">
+              <input type="radio" class="btn-check" name="sexo" id="f-sexo-f" value="F">
+              <label for="f-sexo-f">Femenino</label>
+              <input type="radio" class="btn-check" name="sexo" id="f-sexo-m" value="M">
+              <label for="f-sexo-m">Masculino</label>
+            </div>
+          </fieldset>
+          <div class="campo-trio">
+            <div class="campo">
+              <label class="form-label" for="f-edad">Edad <span class="unidad">(años)</span></label>
+              <input type="text" inputmode="decimal" class="form-control num" id="f-edad" data-campo="paciente.edad" autocomplete="off" aria-describedby="e-edad">
+            </div>
+            <div class="campo">
+              <label class="form-label" for="f-talla">Talla <span class="unidad">(cm)</span></label>
+              <input type="text" inputmode="decimal" class="form-control num" id="f-talla" data-campo="paciente.talla" autocomplete="off" aria-describedby="e-talla">
+            </div>
+            <div class="campo">
+              <label class="form-label" for="f-peso">Peso <span class="unidad">(kg)</span></label>
+              <input type="text" inputmode="decimal" class="form-control num" id="f-peso" data-campo="paciente.peso" autocomplete="off" aria-describedby="e-peso">
+            </div>
+          </div>
+          <div class="errores" aria-live="polite">
+            <p class="error-campo" id="e-edad" hidden></p>
+            <p class="error-campo" id="e-talla" hidden></p>
+            <p class="error-campo" id="e-peso" hidden></p>
+          </div>
+        </div>
+
+        <div class="datos-fila">
+          <div class="dato dato--acento" aria-live="polite">
+            <span class="dato__lbl">Índice de masa corporal (IMC)</span>
+            <span class="dato__val"><span class="num" id="o-imc">—</span><span class="dato__uni">kg/m²</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Paso 2 ===== -->
+      <section class="paso" id="paso-2" data-paso="2" aria-labelledby="t-paso-2">
+        <header class="paso__cab">
+          <span class="paso__num num" aria-hidden="true">02</span>
+          <div>
+            <h2 class="paso__titulo" id="t-paso-2">Gasto energético</h2>
+            <p class="paso__sub">Elige la fórmula de gasto energético basal (GEB); con ella se calcula el GET.</p>
+          </div>
+        </header>
+
+        <fieldset class="bloque">
+          <legend class="subtitulo">Fórmula de GEB</legend>
+          <div class="formulas" id="formulas"></div>
+        </fieldset>
+
+        <div class="aviso" id="aviso-formula" role="status" hidden>
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+          <span id="aviso-formula-txt"></span>
+        </div>
+
+        <div class="factores">
+          <div class="campo">
+            <label class="form-label" for="f-af">Actividad física (AF)</label>
+            <div class="stepper" data-stepper="af">
+              <button type="button" class="stepper__btn" data-dir="-1" aria-label="Disminuir actividad física"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+              <input type="text" inputmode="decimal" class="stepper__input num" id="f-af" autocomplete="off" aria-describedby="a-af e-af">
+              <button type="button" class="stepper__btn" data-dir="1" aria-label="Aumentar actividad física"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+            </div>
+            <p class="form-text" id="a-af">Factor que multiplica al GEB.</p>
+            <p class="error-campo" id="e-af" hidden></p>
+          </div>
+          <div class="campo">
+            <label class="form-label" for="f-eta">Efecto térmico de los alimentos (ETA)</label>
+            <div class="stepper" data-stepper="eta">
+              <button type="button" class="stepper__btn" data-dir="-1" aria-label="Disminuir ETA"><i class="bi bi-dash-lg" aria-hidden="true"></i></button>
+              <input type="text" inputmode="decimal" class="stepper__input num" id="f-eta" autocomplete="off" aria-describedby="a-eta e-eta">
+              <button type="button" class="stepper__btn" data-dir="1" aria-label="Aumentar ETA"><i class="bi bi-plus-lg" aria-hidden="true"></i></button>
+            </div>
+            <p class="form-text" id="a-eta">Fracción del GEB (0.10 = 10 %).</p>
+            <p class="error-campo" id="e-eta" hidden></p>
+          </div>
+        </div>
+
+        <div class="get-panel" aria-live="polite">
+          <div>
+            <span class="get-panel__lbl">Gasto energético total (GET)</span>
+            <span class="get-panel__formula">GET = GEB × AF + GEB × ETA</span>
+          </div>
+          <div class="get-panel__res">
+            <span class="get-panel__val"><span class="num" id="o-get">—</span><span class="dato__uni">kcal/día</span></span>
+            <span class="get-panel__op num" id="o-get-op"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Paso 3 ===== -->
+      <section class="paso" id="paso-3" data-paso="3" aria-labelledby="t-paso-3">
+        <header class="paso__cab">
+          <span class="paso__num num" aria-hidden="true">03</span>
+          <div>
+            <h2 class="paso__titulo" id="t-paso-3">Macronutrimentos y meta de energía</h2>
+            <p class="paso__sub">La meta de energía es la base para los gramos ideales y el % de adecuación.</p>
+          </div>
+        </header>
+
+        <div class="meta">
+          <fieldset class="campo meta__modo">
+            <legend class="form-label">Meta de energía</legend>
+            <div class="segmentado">
+              <input type="radio" class="btn-check" name="metaModo" id="f-meta-get" value="get">
+              <label for="f-meta-get">Usar GET calculado</label>
+              <input type="radio" class="btn-check" name="metaModo" id="f-meta-manual" value="manual">
+              <label for="f-meta-manual">Meta manual</label>
+            </div>
+          </fieldset>
+          <div class="campo meta__manual">
+            <label class="form-label" for="f-meta">Meta manual <span class="unidad">(kcal)</span></label>
+            <input type="text" inputmode="decimal" class="form-control num" id="f-meta" data-campo="metaManual" autocomplete="off" placeholder="Ej. 2500" aria-describedby="e-meta">
+            <p class="error-campo" id="e-meta" hidden></p>
+          </div>
+        </div>
+
+        <div class="datos-fila" aria-live="polite">
+          <div class="dato">
+            <span class="dato__lbl">GET calculado</span>
+            <span class="dato__val"><span class="num" id="o-get-ref">—</span><span class="dato__uni">kcal</span></span>
+          </div>
+          <div class="dato dato--acento">
+            <span class="dato__lbl">Meta usada · <span id="o-meta-origen"></span></span>
+            <span class="dato__val"><span class="num" id="o-meta">—</span><span class="dato__uni">kcal</span></span>
+          </div>
+        </div>
+
+        <h3 class="subtitulo">Distribución</h3>
+        <table class="tabla tabla-macros">
+          <thead>
+            <tr>
+              <th scope="col">Macronutrimento</th>
+              <th scope="col" class="col-num">%</th>
+              <th scope="col" class="col-num">kcal</th>
+              <th scope="col" class="col-num">g</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><label for="f-pct-p">Proteína</label></th>
+              <td class="col-num"><input type="text" inputmode="decimal" class="form-control num input-pct" id="f-pct-p" data-campo="pct.p" autocomplete="off"><span class="sufijo" aria-hidden="true">%</span></td>
+              <td class="col-num num" data-etiqueta="kcal" id="o-kcal-p">—</td>
+              <td class="col-num num" data-etiqueta="g" id="o-g-p">—</td>
+            </tr>
+            <tr>
+              <th scope="row"><label for="f-pct-l">Lípidos</label></th>
+              <td class="col-num"><input type="text" inputmode="decimal" class="form-control num input-pct" id="f-pct-l" data-campo="pct.l" autocomplete="off"><span class="sufijo" aria-hidden="true">%</span></td>
+              <td class="col-num num" data-etiqueta="kcal" id="o-kcal-l">—</td>
+              <td class="col-num num" data-etiqueta="g" id="o-g-l">—</td>
+            </tr>
+            <tr>
+              <th scope="row"><label for="f-pct-h">Hidratos de carbono</label></th>
+              <td class="col-num"><input type="text" inputmode="decimal" class="form-control num input-pct" id="f-pct-h" data-campo="pct.h" autocomplete="off"><span class="sufijo" aria-hidden="true">%</span></td>
+              <td class="col-num num" data-etiqueta="kcal" id="o-kcal-h">—</td>
+              <td class="col-num num" data-etiqueta="g" id="o-g-h">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="suma-fila"><span class="pildora" id="o-suma" role="status"></span></p>
+
+        <div class="nota">
+          <i class="bi bi-journal-text" aria-hidden="true"></i>
+          <div>
+            <strong>Referencias para adolescentes</strong> (Excel de la práctica)
+            <ul>
+              <li>Proteína: <span class="num">24–45 g</span> al día.</li>
+              <li>Azúcares: máximo <span class="num">5 %</span> de la energía, es decir <span class="num" id="o-azucares">—</span> g con la meta actual.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Paso 4 ===== -->
+      <section class="paso" id="paso-4" data-paso="4" aria-labelledby="t-paso-4">
+        <header class="paso__cab">
+          <span class="paso__num num" aria-hidden="true">04</span>
+          <div>
+            <h2 class="paso__titulo" id="t-paso-4">Cuadro de equivalentes</h2>
+            <p class="paso__sub">Sistema Mexicano de Alimentos Equivalentes (SMAE): aporte promedio por grupo.</p>
+          </div>
+        </header>
+
+        <div class="chips" id="eq-filtros" role="group" aria-label="Filtrar subgrupos"></div>
+
+        <div class="table-responsive eq-contenedor">
+          <table class="tabla tabla-eq" id="tabla-eq">
+            <caption class="visually-hidden">Equivalentes por subgrupo y su aporte de energía y macronutrimentos</caption>
+            <thead>
+              <tr>
+                <th scope="col">Grupo</th>
+                <th scope="col">Subgrupo</th>
+                <th scope="col" class="col-centro">Equivalentes</th>
+                <th scope="col" class="col-num">kcal</th>
+                <th scope="col" class="col-num">Proteína <span class="unidad">g</span></th>
+                <th scope="col" class="col-num">Lípidos <span class="unidad">g</span></th>
+                <th scope="col" class="col-num">HdC <span class="unidad">g</span></th>
+              </tr>
+            </thead>
+            <!-- los <tbody> por grupo se generan en ui.js -->
+            <tfoot>
+              <tr class="eq-total">
+                <th scope="row" colspan="2">Total</th>
+                <td class="col-centro num" data-etiqueta="Equivalentes" id="t-eq">—</td>
+                <td class="col-num num" data-etiqueta="kcal" id="t-kcal">—</td>
+                <td class="col-num num" data-etiqueta="Proteína g" id="t-p">—</td>
+                <td class="col-num num" data-etiqueta="Lípidos g" id="t-l">—</td>
+                <td class="col-num num" data-etiqueta="HdC g" id="t-h">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <p class="vacio" id="eq-vacio" hidden>Ningún subgrupo tiene equivalentes todavía. Elige «Todos» para capturar.</p>
+
+        <h3 class="subtitulo">% de adecuación</h3>
+        <div class="aviso" id="aviso-suma" role="status" hidden>
+          <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+          <span>Los porcentajes de macronutrimentos del paso 3 no suman 100 %; la adecuación de proteína, lípidos e HdC no es confiable hasta corregirlos.</span>
+        </div>
+        <div class="adec-grid" id="adec-eq" aria-live="polite"></div>
+
+        <div class="acciones">
+          <button type="button" class="btn btn-outline-secondary" id="btn-limpiar-eq">
+            <i class="bi bi-eraser" aria-hidden="true"></i> Limpiar equivalentes
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== Paso 5 ===== -->
+      <section class="paso" id="paso-5" data-paso="5" aria-labelledby="t-paso-5">
+        <header class="paso__cab">
+          <span class="paso__num num" aria-hidden="true">05</span>
+          <div>
+            <h2 class="paso__titulo" id="t-paso-5">Reparto por tiempos de comida</h2>
+            <p class="paso__sub">Distribuye los equivalentes del paso 4 entre los cinco tiempos.</p>
+          </div>
+        </header>
+
+        <div class="sugerir">
+          <div class="sugerir__txt">
+            <h3 class="subtitulo">Sugerir reparto</h3>
+            <p class="form-text">% de la energía en cada tiempo. Es un punto de partida: después ajusta a mano.</p>
+          </div>
+          <div class="sugerir__pcts" id="pct-tiempos"></div>
+          <div class="sugerir__pie">
+            <span class="pildora" id="o-suma-tiempos" role="status"></span>
+            <button type="button" class="btn btn-primary" id="btn-sugerir">
+              <i class="bi bi-magic" aria-hidden="true"></i> Sugerir reparto
+            </button>
+          </div>
+        </div>
+
+        <div class="reparto-opciones">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="sw-todos">
+            <label class="form-check-label" for="sw-todos">Mostrar todos los subgrupos</label>
+          </div>
+        </div>
+
+        <p class="vacio" id="rep-vacio" hidden>Aún no hay equivalentes en el paso 4. Captúralos para poder repartirlos.</p>
+
+        <!-- Tablet y desktop: tabla de 5 columnas -->
+        <div class="reparto-escritorio" id="rep-escritorio">
+          <div class="table-responsive reparto-scroll" tabindex="0" role="region" aria-label="Tabla de reparto por tiempos de comida">
+            <table class="tabla tabla-reparto" id="tabla-reparto"></table>
+          </div>
+          <h3 class="subtitulo">Menú / platillos</h3>
+          <div class="menus" id="menus-escritorio"></div>
+        </div>
+
+        <!-- Móvil: resumen por subgrupo + acordeón por tiempo -->
+        <div class="reparto-movil" id="rep-movil">
+          <h3 class="subtitulo">Asignado por subgrupo</h3>
+          <ul class="rep-resumen" id="rep-resumen" aria-live="polite"></ul>
+          <div class="accordion" id="rep-acordeon"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="pie app-container">
+    <p>Herramienta de apoyo académico. Verifica los resultados con tu docente y tu bibliografía.</p>
+  </footer>
+
+  <!-- Navegación inferior (móvil) -->
+  <nav class="nav-inferior" aria-label="Pasos de la calculadora">
+    <button type="button" class="nav-inferior__btn" data-ir="1"><i class="bi bi-person" aria-hidden="true"></i><span>Paciente</span></button>
+    <button type="button" class="nav-inferior__btn" data-ir="2"><i class="bi bi-lightning-charge" aria-hidden="true"></i><span>Energía</span></button>
+    <button type="button" class="nav-inferior__btn" data-ir="3"><i class="bi bi-pie-chart" aria-hidden="true"></i><span>Macros</span></button>
+    <button type="button" class="nav-inferior__btn" data-ir="4"><i class="bi bi-grid-3x3-gap" aria-hidden="true"></i><span>Equivalentes</span></button>
+    <button type="button" class="nav-inferior__btn" data-ir="5"><i class="bi bi-clock" aria-hidden="true"></i><span>Tiempos</span></button>
+  </nav>
+
+  <!-- Modal de confirmación (reemplaza a confirm/alert nativos) -->
+  <div class="modal fade" id="modal-confirmar" tabindex="-1" aria-labelledby="modal-confirmar-titulo" aria-describedby="modal-confirmar-texto" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modal-confirmar-titulo"></h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p id="modal-confirmar-texto"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="modal-confirmar-ok"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hoja para imprimir: se llena en ui.js justo antes de imprimir -->
+  <div class="impresion" id="impresion" aria-hidden="true"></div>
+
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

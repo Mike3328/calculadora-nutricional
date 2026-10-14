@@ -1,0 +1,54 @@
+/* Fuentes locales (licencia OFL 1.1; ver assets/fonts/LICENSE-*.txt). Sin peticiones de red. */
+
+/* Instrument Sans — texto e interfaz */
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/instrument-sans-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/instrument-sans-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/instrument-sans-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/instrument-sans-latin-700-normal.woff2") format("woff2");
+}
+
+/* JetBrains Mono — números y resultados */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2");
+}

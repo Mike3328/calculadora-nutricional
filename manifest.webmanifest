@@ -1,0 +1,17 @@
+{
+  "name": "Calculadora nutricional",
+  "short_name": "NutriCalc",
+  "description": "Herramienta de apoyo académico: GEB, GET, macronutrimentos, cuadro de equivalentes SMAE y reparto por tiempos de comida.",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F5F2",
+  "theme_color": "#16231F",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

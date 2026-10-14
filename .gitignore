@@ -1,0 +1,30 @@
+# Dependencias: npm solo se usa para descargar las librerías que luego se copian a /vendor.
+# El proyecto publicado no depende de node_modules.
+node_modules/
+package.json
+package-lock.json
+npm-debug.log*
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Editores e IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos temporales de Office (por ejemplo, el Excel de la práctica abierto)
+~$*
+
+# Herramientas locales
+.claude/
+*.tmp
+.env
+.env.*

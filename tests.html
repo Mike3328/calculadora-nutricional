@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pruebas de las fórmulas · Calculadora nutricional</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/fonts.css">
+  <style>
+    :root { color-scheme: light; }
+    body {
+      margin: 0; padding: 24px 16px 48px;
+      background: #F3F5F2; color: #16231F;
+      font: 400 16px/1.5 "Instrument Sans", system-ui, sans-serif;
+    }
+    main { max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 4px; }
+    h2 { font-size: 1rem; font-weight: 600; margin: 28px 0 8px; color: #52605B; }
+    p { margin: 0 0 16px; color: #52605B; }
+    a { color: #1F6F5C; }
+    .num { font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+    #resumen {
+      display: inline-block; padding: 8px 16px; border-radius: 999px; font-weight: 600;
+    }
+    #resumen.ok { background: #DDEFE3; color: #1A6E3E; }
+    #resumen.falla { background: #F7DCD8; color: #9C2E20; }
+    ul { list-style: none; margin: 0; padding: 0; background: #fff; border: 1px solid #DCE2DE; border-radius: 18px; overflow: hidden; }
+    li { display: grid; grid-template-columns: 92px 1fr auto; gap: 12px; align-items: baseline; padding: 10px 16px; border-top: 1px solid #DCE2DE; }
+    li:first-child { border-top: 0; }
+    .estado { font-weight: 600; font-size: .875rem; }
+    li.ok .estado { color: #1A6E3E; }
+    li.falla .estado { color: #9C2E20; }
+    li.falla { background: #FDF3F1; }
+    .detalle { color: #52605B; font-size: .875rem; text-align: right; }
+    @media (max-width: 560px) {
+      li { grid-template-columns: 80px 1fr; }
+      .detalle { grid-column: 2; text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Pruebas de las fórmulas</h1>
+    <p>Comprueba <code>js/data.js</code> y <code>js/calc.js</code> contra el Excel de la práctica (tolerancia ±0.1). <a href="index.html">Volver a la calculadora</a></p>
+    <div id="resumen" role="status" aria-live="polite">Ejecutando…</div>
+    <div id="lista"></div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/calc.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      var C = NutriCalc.calc;
+      var D = NutriCalc.data;
+      var TOL = 0.1;
+      var secciones = [];
+      var actual = null;
+
+      function seccion(titulo) { actual = { titulo: titulo, pruebas: [] }; secciones.push(actual); }
+      function registrar(nombre, ok, detalle) { actual.pruebas.push({ nombre: nombre, ok: !!ok, detalle: detalle }); }
+      function cerca(nombre, obtenido, esperado) {
+        var ok = typeof obtenido === 'number' && isFinite(obtenido) && Math.abs(obtenido - esperado) <= TOL + 1e-9;
+        registrar(nombre, ok, 'esperado ' + esperado + ' · obtenido ' + (typeof obtenido === 'number' ? Math.round(obtenido * 1000) / 1000 : String(obtenido)));
+      }
+      function igual(nombre, obtenido, esperado) {
+        registrar(nombre, obtenido === esperado, 'esperado ' + String(esperado) + ' · obtenido ' + String(obtenido));
+      }
+
+      /* ---------- Caso Ermenegilda (F, 15 años, 161 cm, 56 kg) ---------- */
+      var erme = { sexo: 'F', edad: 15, talla: 161, peso: 56 };
+      var eqErme = D.EJEMPLO.eq;
+
+      seccion('Caso Ermenegilda · paciente y gasto energético');
+      cerca('IMC', C.imc(erme.peso, erme.talla), 21.6);
+      cerca('GEB IOM', C.geb('IOM', erme).valor, 1373.65);
+      cerca('GEB Schofield', C.geb('SCH', erme).valor, 1442.1);
+      cerca('GEB FAO/OMS', C.geb('FAO', erme).valor, 1429.2);
+      cerca('GEB Mifflin-St Jeor', C.geb('MIF', erme).valor, 1330.9);
+      cerca('GEB Harris-Benedict', C.geb('HB', erme).valor, 1418.0);
+      igual('GEB Valencia: fuera de rango', C.geb('VAL', erme).motivo, 'rango');
+      igual('GEB Valencia: sin valor', C.geb('VAL', erme).valor, null);
+      igual('Mifflin avisa en menores de 18', C.geb('MIF', erme).aviso, D.AVISO_MENORES);
+      igual('Harris-Benedict avisa en menores de 18', C.geb('HB', erme).aviso, D.AVISO_MENORES);
+      igual('IOM no muestra aviso', C.geb('IOM', erme).aviso, null);
+      var getErme = C.get(C.geb('IOM', erme).valor, 1.6, 0.1);
+      cerca('GET (IOM, AF 1.6, ETA 0.10)', getErme, 2335.2);
+
+      seccion('Caso Ermenegilda · cuadro de equivalentes');
+      var tot = C.totalesEquivalentes(eqErme);
+      cerca('Total kcal', tot.kcal, 2462.5);
+      cerca('Total proteína (g)', tot.p, 97.5);
+      cerca('Total lípidos (g)', tot.l, 67.5);
+      cerca('Total HdC (g)', tot.h, 365);
+      cerca('Total de equivalentes', tot.eq, 35);
+
+      seccion('Meta manual 2,500 kcal · 15/25/60');
+      var pct = { p: 15, l: 25, h: 60 };
+      var idealManual = C.macrosIdeales(2500, pct);
+      cerca('Ideal proteína (g)', idealManual.p.g, 93.75);
+      cerca('Ideal lípidos (g)', idealManual.l.g, 69.44);
+      cerca('Ideal HdC (g)', idealManual.h.g, 375);
+      igual('Los % suman 100', idealManual.sumaOk, true);
+      var adManual = C.adecuacion(tot, 2500, idealManual);
+      cerca('Adecuación energía (%)', adManual.kcal, 98.5);
+      igual('Semáforo energía', C.estadoSemaforo(adManual.kcal).texto, 'Adecuado');
+      cerca('Adecuación proteína (%)', adManual.p, 104.0);
+      igual('Semáforo proteína', C.estadoSemaforo(adManual.p).texto, 'Adecuado');
+      cerca('Adecuación lípidos (%)', adManual.l, 97.2);
+      igual('Semáforo lípidos', C.estadoSemaforo(adManual.l).texto, 'Adecuado');
+      cerca('Adecuación HdC (%)', adManual.h, 97.3);
+      igual('Semáforo HdC', C.estadoSemaforo(adManual.h).texto, 'Adecuado');
+
+      seccion('Meta = GET 2,335.2 kcal · 15/25/60');
+      var idealGet = C.macrosIdeales(getErme, pct);
+      var adGet = C.adecuacion(tot, getErme, idealGet);
+      cerca('Adecuación energía (%)', adGet.kcal, 105.5);
+      igual('Semáforo energía', C.estadoSemaforo(adGet.kcal).texto, 'Excede');
+      cerca('Adecuación proteína (%)', adGet.p, 111.3);
+      igual('Semáforo proteína', C.estadoSemaforo(adGet.p).texto, 'Excede');
+      cerca('Adecuación lípidos (%)', adGet.l, 104.1);
+      igual('Semáforo lípidos', C.estadoSemaforo(adGet.l).texto, 'Adecuado');
+      cerca('Adecuación HdC (%)', adGet.h, 104.2);
+      igual('Semáforo HdC', C.estadoSemaforo(adGet.h).texto, 'Adecuado');
+
+      seccion('Caso hombre (M, 16 años, 170 cm, 60 kg)');
+      cerca('GEB IOM', C.geb('IOM', { sexo: 'M', edad: 16, talla: 170, peso: 60 }).valor, 1737.6);
+
+      seccion('Reparto sugerido 25/10/30/10/25');
+      var rep = C.sugerirReparto(eqErme, ['25', '10', '30', '10', '25']);
+      var filasOk = true, mediosOk = true, negativos = false;
+      D.SMAE.forEach(function (sub) {
+        var total = eqErme[sub.id] || 0;
+        var fila = rep[sub.id] || [0, 0, 0, 0, 0];
+        var suma = fila.reduce(function (s, n) { return s + n; }, 0);
+        if (suma !== total) filasOk = false;
+        fila.forEach(function (n) {
+          if ((n * 2) % 1 !== 0) mediosOk = false;
+          if (n < 0) negativos = true;
+        });
+      });
+      igual('Cada fila suma exactamente su total', filasOk, true);
+      igual('Todos los valores son múltiplos de 0.5', mediosOk, true);
+      igual('No hay valores negativos', negativos, false);
+      var estados = C.estadoReparto(rep, eqErme);
+      igual('Todas las filas con equivalentes quedan completas', D.SMAE.every(function (s) {
+        return estados[s.id].estado === (eqErme[s.id] ? 'completo' : 'vacio');
+      }), true);
+      var porTiempo = C.totalesPorTiempo(rep, tot.kcal);
+      cerca('Los tiempos suman la energía del día', porTiempo.reduce(function (s, t) { return s + t.kcal; }, 0), 2462.5);
+      cerca('Los % de energía por tiempo suman 100', porTiempo.reduce(function (s, t) { return s + t.pctEnergia; }, 0), 100);
+      igual('Sin sugerencia si los % no suman 100', C.sugerirReparto(eqErme, ['25', '10', '30', '10', '20']), null);
+      var parejo = C.sugerirReparto({ verduras: 1.5 }, ['20', '20', '20', '20', '20']).verduras;
+      igual('Con % iguales la fila sigue cuadrando (1.5)', parejo.reduce(function (s, n) { return s + n; }, 0), 1.5);
+      igual('Con % iguales no hay negativos', parejo.every(function (n) { return n >= 0; }), true);
+
+      seccion('Rangos de edad y coeficientes');
+      var adulto = function (sexo, edad) { return { sexo: sexo, edad: edad, talla: 165, peso: 60 }; };
+      igual('IOM a los 19 años: fuera de rango', C.geb('IOM', adulto('F', 19)).motivo, 'rango');
+      igual('IOM a los 2 años: fuera de rango', C.geb('IOM', adulto('F', 2)).motivo, 'rango');
+      igual('Schofield a los 9 años: fuera de rango', C.geb('SCH', adulto('F', 9)).motivo, 'rango');
+      igual('FAO/OMS a los 9 años: fuera de rango', C.geb('FAO', adulto('F', 9)).motivo, 'rango');
+      cerca('FAO/OMS mujer 18 años (14.7·P + 496)', C.geb('FAO', adulto('F', 18)).valor, 1378);
+      cerca('FAO/OMS mujer 30 años (8.47·P + 829, coeficiente del Excel)', C.geb('FAO', adulto('F', 30)).valor, 1337.2);
+      cerca('FAO/OMS mujer 61 años (10.5·P + 596)', C.geb('FAO', adulto('F', 61)).valor, 1226);
+      cerca('FAO/OMS hombre 60 años (11.6·P + 879)', C.geb('FAO', adulto('M', 60)).valor, 1575);
+      cerca('Valencia mujer 30.5 años (primer rango)', C.geb('VAL', adulto('F', 30.5)).valor, 1340.2);
+      cerca('Valencia mujer 31 años (segundo rango)', C.geb('VAL', adulto('F', 31)).valor, 1332.2);
+      cerca('Valencia hombre 25 años (13.7·P + 747, coeficiente del Excel)', C.geb('VAL', adulto('M', 25)).valor, 1569);
+      igual('Valencia a los 61 años: fuera de rango', C.geb('VAL', adulto('M', 61)).motivo, 'rango');
+      igual('Mifflin en adultos no avisa', C.geb('MIF', adulto('F', 25)).aviso, null);
+      cerca('Mifflin hombre 25 años', C.geb('MIF', adulto('M', 25)).valor, 1512.65);
+      cerca('Harris-Benedict hombre 25 años', C.geb('HB', adulto('M', 25)).valor, 1547);
+
+      seccion('Captura y datos incompletos');
+      igual('Coma decimal: «56,5» → 56.5', C.aNumero('56,5'), 56.5);
+      igual('Punto decimal: «56.5» → 56.5', C.aNumero('56.5'), 56.5);
+      igual('Texto no numérico → null', C.aNumero('abc'), null);
+      igual('Vacío → null', C.aNumero(''), null);
+      igual('IMC sin talla → null', C.imc(56, null), null);
+      igual('GEB sin peso: faltan datos', C.geb('IOM', { sexo: 'F', edad: 15, talla: 161, peso: null }).motivo, 'datos');
+      igual('GET sin GEB → null', C.get(null, 1.6, 0.1), null);
+      igual('Talla en metros (1.61) se rechaza', C.validarCampo('1.61', D.LIMITES.talla).estado, 'fuera');
+      igual('Adecuación sin meta → null', C.adecuacion(tot, null, C.macrosIdeales(null, pct)).kcal, null);
+      igual('Semáforo sin dato → null', C.estadoSemaforo(null), null);
+      igual('Semáforo 94.9 % → Bajo', C.estadoSemaforo(94.9).texto, 'Bajo');
+      igual('Semáforo 95 % → Adecuado', C.estadoSemaforo(95).texto, 'Adecuado');
+      igual('Semáforo 105 % → Adecuado', C.estadoSemaforo(105).texto, 'Adecuado');
+      igual('Semáforo 105.1 % → Excede', C.estadoSemaforo(105.1).texto, 'Excede');
+      var derivado = C.derivar({
+        paciente: D.EJEMPLO.paciente, formulaId: 'IOM', af: '1,6', eta: '0,10',
+        metaModo: 'get', metaManual: '', pct: D.EJEMPLO.pct, eq: eqErme,
+        reparto: {}, pctTiempos: D.DEFAULTS.pctTiempos, menus: []
+      });
+      cerca('derivar(): GET con AF y ETA escritos con coma', derivado.get, 2335.2);
+      igual('derivar(): reparto vacío → «faltan»', derivado.filasReparto.verduras.estado, 'faltan');
+
+      /* ---------- salida ---------- */
+      var lista = document.getElementById('lista');
+      var total = 0, fallas = 0;
+      secciones.forEach(function (s) {
+        var h = document.createElement('h2');
+        h.textContent = s.titulo;
+        var ul = document.createElement('ul');
+        s.pruebas.forEach(function (p) {
+          total++;
+          if (!p.ok) fallas++;
+          var li = document.createElement('li');
+          li.className = p.ok ? 'ok' : 'falla';
+          var e = document.createElement('span');
+          e.className = 'estado';
+          e.textContent = p.ok ? '✓ Pasa' : '✗ Falla';
+          var n = document.createElement('span');
+          n.textContent = p.nombre;
+          var d = document.createElement('span');
+          d.className = 'detalle num';
+          d.textContent = p.detalle;
+          li.appendChild(e); li.appendChild(n); li.appendChild(d);
+          ul.appendChild(li);
+        });
+        lista.appendChild(h);
+        lista.appendChild(ul);
+      });
+      var resumen = document.getElementById('resumen');
+      resumen.className = fallas ? 'falla' : 'ok';
+      resumen.textContent = fallas
+        ? fallas + ' de ' + total + ' pruebas fallan'
+        : 'Las ' + total + ' pruebas pasan';
+      resumen.dataset.total = total;
+      resumen.dataset.fallas = fallas;
+    })();
+  </script>
+</body>
+</html>

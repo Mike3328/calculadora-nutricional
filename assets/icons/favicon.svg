@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Calculadora nutricional">
+  <rect width="48" height="48" rx="11" fill="#1F6F5C"/>
+  <g fill="none" stroke="#fff" stroke-width="6" transform="rotate(-90 24 24)">
+    <circle cx="24" cy="24" r="12" stroke-dasharray="43.2 75.4"/>
+    <circle cx="24" cy="24" r="12" stroke-opacity=".65" stroke-dasharray="16.8 75.4" stroke-dashoffset="-45.2"/>
+    <circle cx="24" cy="24" r="12" stroke-opacity=".35" stroke-dasharray="9.3 75.4" stroke-dashoffset="-64.1"/>
+  </g>
+</svg>

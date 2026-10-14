@@ -1,0 +1,109 @@
+/* NutriCalc · print.css
+ * Al imprimir se oculta toda la app y solo se muestra la hoja #impresion,
+ * que ui.js llena justo antes de imprimir. Tamaño carta, una columna.
+ */
+
+@page {
+  size: letter;
+  margin: 14mm 14mm 16mm;
+}
+
+html, body {
+  background: #fff !important;
+  color: #000;
+}
+body {
+  min-height: 0;
+  padding: 0 !important;
+  overflow: visible;
+  font-size: 10pt;
+  line-height: 1.35;
+}
+
+.salto,
+.app-header,
+.pasos-nav,
+.app-cuerpo,
+.pie,
+.nav-inferior,
+.modal,
+.modal-backdrop,
+.popover {
+  display: none !important;
+}
+
+.impresion { display: block; padding: 0 1px; }
+
+.impresion .imp-cab {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12pt;
+  padding-bottom: 6pt;
+  border-bottom: 1.5pt solid #16231F;
+}
+.impresion .imp-eyebrow {
+  margin: 0;
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #52605B;
+}
+.impresion h1 { margin: 2pt 0 0; font-size: 18pt; font-weight: 700; line-height: 1.2; }
+.impresion .imp-fecha { margin: 0; font-size: 9pt; color: #52605B; white-space: nowrap; }
+
+.impresion section { margin-top: 11pt; break-inside: avoid; }
+.impresion h2 {
+  margin: 0 0 4pt;
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: #1F6F5C;
+  break-after: avoid;
+}
+.impresion h3 { margin: 0 0 1pt; font-size: 9.5pt; font-weight: 700; }
+
+.imp-tabla { width: 100%; border-collapse: collapse; font-size: 9pt; }
+.imp-tabla th, .imp-tabla td {
+  padding: 2.5pt 5pt;
+  border: .5pt solid #B4BFBA;
+  text-align: left;
+  vertical-align: top;
+}
+.imp-tabla thead th { background: #EDF1EE; font-size: 8pt; font-weight: 700; }
+.imp-tabla tbody th { font-weight: 600; }
+.imp-tabla tfoot th, .imp-tabla tfoot td { background: #F3F5F2; font-weight: 700; }
+.imp-tabla .n {
+  text-align: right;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.imp-tabla thead th.n { font-family: inherit; }
+.imp-tabla tr { break-inside: avoid; }
+.imp-tabla thead { display: table-header-group; }
+.imp-tabla tfoot { display: table-row-group; }
+
+.imp-eq thead th:nth-child(3) { width: 9%; }
+.imp-eq thead th:nth-child(n+4) { width: 14%; }
+
+.imp-datos th { width: 1%; background: #EDF1EE; white-space: nowrap; }
+.imp-datos td { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 8.5pt; }
+
+.imp-nota { margin: 4pt 0 0; font-size: 8.5pt; color: #3C4944; }
+
+.imp-menu { margin-top: 5pt; break-inside: avoid; }
+.imp-menu p { margin: 0; font-size: 9.5pt; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.imp-pie {
+  margin-top: 12pt;
+  padding-top: 5pt;
+  border-top: .5pt solid #B4BFBA;
+  font-size: 8pt;
+  color: #52605B;
+}
+
+* {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
